@@ -1,0 +1,178 @@
+---
+title: "Filmes infantis para assistir com meu filho"
+date: ""
+output:
+  rmdformats::html_docco:
+    highlight: kate
+---
+
+```{r setup, include=FALSE}
+## Global options
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+::: {style="text-align: center"}
+## Contexto
+:::
+
+::: {style="text-align: justify"}
+Meu nome é Gustavo e tenho um filho de 3 anos e 9 meses chamado Christopher. Ele tem se interessado mais por filmes infantis ultimamente. Contudo, eu não conheço bons filmes infantis para colocar para assistirmos juntos. E ele não fica nada feliz com essa minha falta de conhecimento...
+:::
+
+::: {style="text-align: center"}
+![](Chris1.jpeg){width="197"}
+:::
+
+::: {style="text-align: justify"}
+Sendo assim, resolvi utilizar as minha habilidades de programação adquiridas no Curso-R para selecionar bons filmes infantis. Utilizarei para essa finalidade a base de dados disponível no site [IMDb](https://www.imdb.com/).
+:::
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# pacotes
+library(tidyverse)
+library(ggplot2)
+library(knitr)
+library(DT)
+library(plotly)
+library(scales)
+
+# importar banco de dados
+imdb <- readRDS("imdb.rds")
+```
+
+::: {style="text-align: justify"}
+O banco do IMDb disponibiliza as seguintes informações:
+:::
+
+```{r echo=FALSE}
+variaveis <- names(imdb)  
+
+descricao <- c(
+  "Título do filme em inglês", 
+  "Ano da estréia",
+  "Diretor",
+  "Duração do filme em minutos",
+  "Cor do filme (preto e branco ou colorido)",
+  "Gêneros do filme",
+  "País que o filme foi produzido",
+  "Classificação etária do filme",
+  "Orçamento do filme em dólares",
+  "Receita do filme em dólares",
+  "Nota do filme no site IMDb",
+  "Quantidade de curtidas no Facebook",
+  "Ator/atriz principal 1",
+  "Ator/atriz principal 2",
+  "Ator/atriz principal 3"
+) 
+
+variaveis <- cbind(variaveis, descricao)
+colnames(variaveis) <- c("Variáveis", "Descrição") 
+
+kable(variaveis)
+
+datatable(imdb[1:5,])
+```
+
+
+```{r include=FALSE}
+imdb_infantil <- imdb %>% 
+  filter(classificacao =="Livre")
+
+imdb_infantil_animacao <- imdb %>% 
+  filter(classificacao =="Livre") %>% 
+   filter(str_detect(generos, pattern = "Animation"))
+
+imdb_infantil_lucrativo <- imdb_infantil_animacao %>% 
+  mutate(lucro = receita - orcamento) %>% 
+  filter(receita - orcamento > 0) %>% 
+  arrange(desc(lucro))
+
+imdb_infantil_bons <- imdb_infantil_lucrativo %>% 
+  filter(nota_imdb > 7) %>% 
+  arrange(desc(nota_imdb))
+```
+
+
+::: {style="text-align: justify"}
+A partir dessas informações selecionei apenas os filmes que possuem classificação
+Livre, passando de `r nrow(imdb)` para `r nrow(imdb_infantil)` filmes. Contudo, 
+como meu filho ainda é muito novo, penso que ele gostaria mais de filmes que
+sejam animações. Incluindo esse novo critério, fiquei com um total de `r nrow(imdb_infantil_animacao)` filmes que são animações de classificação Livre, os quais serão explorados. 
+
+Entretanto, ainda é uma quantidade muito grande de filmes para escolher.
+Além disso, eu quero assistir filmes bons como meu filho. Então, em seguida eu 
+analisei quais desses filmes foram lucrativos. Como é possível ver no gráfico abaixo,
+`r nrow(imdb_infantil_lucrativo)` filmes foram lucrativos. 
+Destaquei em pontos maiores os 10 filmes mais lucrativos. Ao colocar o mouse em cima dos pontos é possível saber de qual filme se trata.
+:::
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align = "center", out.width = "100%", fig.cap="Nota.Os pontos acima da reta vermelha são os filmes que tiveram lucro. 5 filmes foram excluídos do gráfico por não conterem informação sobre orçamento e/ou receita."}
+grafico_lucro <- imdb_infantil_animacao %>% 
+  ggplot(aes(x = orcamento, y = receita, text = titulo)) +
+  geom_point() +
+  geom_point(data = imdb_infantil_lucrativo[1:10,], #aes(colour = titulo),
+             size = 3) +
+  geom_abline(colour = "red") +
+  labs(
+    x = "Orçamento (milhões de dólares)",
+    y = "Receita (milhões de dólares)",
+    title = "Lucratividade dos filmes infantis"
+  ) + 
+  scale_x_continuous(
+    breaks = seq(0, 300000000, 50000000),
+    labels = label_comma(
+      scale = 1/1000000,
+      big.mark = ".", decimal.mark = ","),
+  ) +
+  scale_y_continuous(
+    labels = label_comma(
+      scale = 1/1000000,
+      big.mark = ".", decimal.mark = ",")
+  ) +
+  theme_minimal()
+
+  ggplotly(grafico_lucro)
+```
+
+::: {style="text-align: justify"}
+Mesmo tendo selecionado os `r nrow(imdb_infantil_lucrativo)` filmes infantis que foram lucrativos, meu problema ainda não foi resolvido, pois ainda será difícil escolher quais filmes
+vou assistir primeiro. Pensando nisso, selecionei os filmes que tiveram nota no
+site do IMDb acima de 7 (para ser bem criterioso). 
+No gráfico de barras a seguir estão os `r nrow(imdb_infantil_bons)` filmes que tiveram lucro e nota acima de 7, ordenados pela nota no IMDb.
+:::
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align = "center", out.width = "100%"}
+grafico_nota <- imdb_infantil_bons %>% 
+  mutate(filmes_fator = fct_reorder(titulo, nota_imdb)) %>% 
+  ggplot(aes(y = filmes_fator, x = nota_imdb, fill = filmes_fator)) +
+  geom_col(color = "gray",
+           alpha = 1,
+           show.legend = FALSE) +
+  scale_fill_viridis_d() +
+  scale_x_continuous(breaks = seq(0, 10, .5)) +
+  coord_cartesian(xlim = c(6.5, 8.5)) +
+  labs(
+    x = "Nota IMDb", 
+    y = "Filme",
+    title = "Filmes infantis com nota IMDb acima de 7"
+  ) +
+  theme_minimal()
+
+ggplotly(grafico_nota) %>% 
+hide_legend()
+```
+
+::: {style="text-align: justify"}
+Pronto, agora teremos um total de `r sum(imdb_infantil_bons$duracao)` minutos
+de alguns bons filmes para assistirmos juntos :)
+:::
+
+::: {style="text-align: center"}
+![](Chris2.jpeg){width="267"}
+:::
+
+::: {style="text-align: right"}
+Gustavo Henrique Martins
+
+01-11-2021
+:::
