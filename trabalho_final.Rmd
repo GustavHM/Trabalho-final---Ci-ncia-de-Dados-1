@@ -175,4 +175,6 @@ de alguns bons filmes para assistirmos juntos :)
 Gustavo Henrique Martins
 
 01-11-2021
+
+Todo o material desse relatório pode ser acessado no meu [repositório](https://github.com/GustavHM/Trabalho_final_ciencia_dados_1).
 :::
