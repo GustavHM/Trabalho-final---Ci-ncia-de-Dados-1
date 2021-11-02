@@ -4,6 +4,9 @@ date: ""
 output:
   rmdformats::html_docco:
     highlight: kate
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
@@ -12,19 +15,33 @@ knitr::opts_chunk$set(cache = TRUE)
 ```
 
 ::: {style="text-align: center"}
-## Contexto
+## CONTEXTO
 :::
 
 ::: {style="text-align: justify"}
-Meu nome é Gustavo e tenho um filho de 3 anos e 9 meses chamado Christopher. Ele tem se interessado mais por filmes infantis ultimamente. Contudo, eu não conheço bons filmes infantis para colocar para assistirmos juntos. E ele não fica nada feliz com essa minha falta de conhecimento...
+Meu nome é Gustavo e tenho um filho de 3 anos e 9 meses chamado
+Christopher. Ele tem se interessado mais por filmes infantis
+ultimamente. Contudo, eu não conheço bons filmes infantis para colocar
+para assistirmos juntos. E ele não fica nada feliz com essa minha falta
+de conhecimento...
 :::
 
 ::: {style="text-align: center"}
 ![](Chris1.jpeg){width="197"}
 :::
 
+::: {style="text-align: center"}
+## BANCO DE DADOS
+:::
+
 ::: {style="text-align: justify"}
-Sendo assim, resolvi utilizar as minha habilidades de programação adquiridas no Curso-R para selecionar bons filmes infantis. Utilizarei para essa finalidade a base de dados disponível no site [IMDb](https://www.imdb.com/).
+Sendo assim, resolvi utilizar as minha habilidades de programação
+adquiridas no Curso-R para selecionar bons filmes infantis. Utilizarei
+para essa finalidade a base de dados disponível no site
+[IMDb](https://www.imdb.com/).
+
+O banco do IMDb disponibiliza as informações descritas abaixo. Eu também selecionei
+os cinco primeiros casos do banco para me familiarizar mais com o banco.
 :::
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
@@ -39,10 +56,6 @@ library(scales)
 # importar banco de dados
 imdb <- readRDS("imdb.rds")
 ```
-
-::: {style="text-align: justify"}
-O banco do IMDb disponibiliza as seguintes informações:
-:::
 
 ```{r echo=FALSE}
 variaveis <- names(imdb)  
@@ -73,6 +86,9 @@ kable(variaveis)
 datatable(imdb[1:5,])
 ```
 
+::: {style="text-align: center"}
+## SELECIONANDO BONS FILMES INFANTIS
+:::
 
 ```{r include=FALSE}
 imdb_infantil <- imdb %>% 
@@ -92,18 +108,22 @@ imdb_infantil_bons <- imdb_infantil_lucrativo %>%
   arrange(desc(nota_imdb))
 ```
 
-
 ::: {style="text-align: justify"}
-A partir dessas informações selecionei apenas os filmes que possuem classificação
-Livre, passando de `r nrow(imdb)` para `r nrow(imdb_infantil)` filmes. Contudo, 
-como meu filho ainda é muito novo, penso que ele gostaria mais de filmes que
-sejam animações. Incluindo esse novo critério, fiquei com um total de `r nrow(imdb_infantil_animacao)` filmes que são animações de classificação Livre, os quais serão explorados. 
+A partir dessas informações selecionei apenas os filmes que possuem
+classificação Livre, passando de `r nrow(imdb)` para
+`r nrow(imdb_infantil)` filmes. Contudo, como meu filho ainda é muito
+novo, penso que ele gostaria mais de filmes que sejam animações.
+Incluindo esse novo critério, fiquei com um total de
+`r nrow(imdb_infantil_animacao)` filmes que são animações de
+classificação Livre, os quais serão explorados.
 
 Entretanto, ainda é uma quantidade muito grande de filmes para escolher.
-Além disso, eu quero assistir filmes bons como meu filho. Então, em seguida eu 
-analisei quais desses filmes foram lucrativos. Como é possível ver no gráfico abaixo,
-`r nrow(imdb_infantil_lucrativo)` filmes foram lucrativos. 
-Destaquei em pontos maiores os 10 filmes mais lucrativos. Ao colocar o mouse em cima dos pontos é possível saber de qual filme se trata.
+Além disso, eu quero assistir bons filmes com meu filho. Então, em
+seguida eu analisei quais desses filmes foram lucrativos. Como é
+possível ver no gráfico abaixo, `r nrow(imdb_infantil_lucrativo)` filmes
+foram lucrativos. Destaquei em pontos maiores os 10 filmes mais
+lucrativos. Ao colocar o mouse em cima dos pontos é possível saber de
+qual filme se trata.
 :::
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align = "center", out.width = "100%", fig.cap="Nota.Os pontos acima da reta vermelha são os filmes que tiveram lucro. 5 filmes foram excluídos do gráfico por não conterem informação sobre orçamento e/ou receita."}
@@ -135,13 +155,16 @@ grafico_lucro <- imdb_infantil_animacao %>%
 ```
 
 ::: {style="text-align: justify"}
-Mesmo tendo selecionado os `r nrow(imdb_infantil_lucrativo)` filmes infantis que foram lucrativos, meu problema ainda não foi resolvido, pois ainda será difícil escolher quais filmes
-vou assistir primeiro. Pensando nisso, selecionei os filmes que tiveram nota no
-site do IMDb acima de 7 (para ser bem criterioso). 
-No gráfico de barras a seguir estão os `r nrow(imdb_infantil_bons)` filmes que tiveram lucro e nota acima de 7, ordenados pela nota no IMDb.
+Mesmo tendo selecionado os `r nrow(imdb_infantil_lucrativo)` filmes
+infantis que foram lucrativos, meu problema ainda não foi resolvido,
+pois ainda será difícil escolher quais filmes vou assistir primeiro.
+Pensando nisso, selecionei os filmes que tiveram nota no site do IMDb
+acima de 7 (para ser bem criterioso). No gráfico de barras a seguir
+estão os `r nrow(imdb_infantil_bons)` filmes que tiveram lucro e nota
+acima de 7, ordenados pela nota no IMDb.
 :::
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align = "center", out.width = "100%"}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align = "center", out.width = "100%", fig.cap="Nota. O título dos filmes estão em inglês, assim como consta no banco do IMDb."}
 grafico_nota <- imdb_infantil_bons %>% 
   mutate(filmes_fator = fct_reorder(titulo, nota_imdb)) %>% 
   ggplot(aes(y = filmes_fator, x = nota_imdb, fill = filmes_fator)) +
@@ -162,9 +185,13 @@ ggplotly(grafico_nota) %>%
 hide_legend()
 ```
 
+::: {style="text-align: center"}
+## CONCLUSÃO
+:::
+
 ::: {style="text-align: justify"}
-Pronto, agora teremos um total de `r sum(imdb_infantil_bons$duracao)` minutos
-de alguns bons filmes para assistirmos juntos :)
+Pronto, agora teremos um total de `r sum(imdb_infantil_bons$duracao)`
+minutos de alguns bons filmes para assistirmos juntos :)
 :::
 
 ::: {style="text-align: center"}
@@ -176,5 +203,6 @@ Gustavo Henrique Martins
 
 01-11-2021
 
-Todo o material desse relatório pode ser acessado no meu [repositório](https://github.com/GustavHM/Trabalho_final_ciencia_dados_1).
+Todo o material desse relatório pode ser acessado no meu
+[repositório do GitHub](https://github.com/GustavHM/Trabalho_final_ciencia_dados_1).
 :::
